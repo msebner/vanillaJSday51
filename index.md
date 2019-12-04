@@ -1,4 +1,3 @@
-<html>
 <head>
 	<title>Form Autosave - Other Input Types</title>
 
@@ -241,4 +240,3 @@
 
 </script>
 </body>
-</html>
