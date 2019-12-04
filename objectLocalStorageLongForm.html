@@ -95,151 +95,151 @@
 
 		;(function(){
 
-			//
-			// Variables
-			//
+		//
+		// Variables
+		//
 
-			var storagePrefix = 'form-object-autosave';
+		var storagePrefix = 'form-object-autosave';
 
-			//Create an array of form inputs & textarea - available to all functions in the IIFE
-			inputs = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
+		//Create an array of form inputs & textarea - available to all functions in the IIFE
+		inputs = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
 
-			//
-			// Methods
-			//
+		//
+		// Methods
+		//
 
-			/**
-			 * Get an ID for a field
-			 * @param  {Node}   field The field
-			 * @return {String}       The ID
-			 */
-			 var getID = function (field) {
+		/**
+		 * Get an ID for a field
+		 * @param  {Node}   field The field
+		 * @return {String}       The ID
+		 */
+		 var getID = function (field) {
 
-			 	if (field.id.length > 0) {
-			 		return field.id;
-			 	}
+		 	if (field.id.length > 0) {
+		 		return field.id;
+		 	}
 
-			 	if (field.name.length > 0) {
-			 		return field.name;
-			 	}
+		 	if (field.name.length > 0) {
+		 		return field.name;
+		 	}
 
-			 	return null;
+		 	return null;
 
-			 };
+		 };
 
-			//Load the saved storage data on page load
-			var loadInfo = function(){
+		//Load the saved storage data on page load
+		var loadInfo = function(){
 
-				inputs.map(function(input){
+			inputs.map(function(input){
 
-					var id = getID(input);
-					if (!id) return;
+				var id = getID(input);
+				if (!id) return;
 
-					// console.log(id);
+				// console.log(id);
 
-					//Return the data from locaStorage
-					var formData = localStorage.getItem(storagePrefix);
-					if (!formData) return;
+				//Return the data from locaStorage
+				var formData = localStorage.getItem(storagePrefix);
+				if (!formData) return;
 
-					// Convert the data from string to object
-					formData = JSON.parse(formData);
+				// Convert the data from string to object
+				formData = JSON.parse(formData);
 
-					// If there's no formData stop the function
-					if (!formData[id]) return;
+				// If there's no formData stop the function
+				if (!formData[id]) return;
 
-					// If the input is a checkbox
-					if (input.type === 'checkbox'){
+				// If the input is a checkbox
+				if (input.type === 'checkbox'){
 
-						// if the localStorage data for the input is 'on'
-						if (formData[id] === 'on'){
+					// if the localStorage data for the input is 'on'
+					if (formData[id] === 'on'){
 
-							// check the checkbox
+						// check the checkbox
+						input.checked = true;
+						return;
+					}
+				}
+
+				// If the input is a radio button
+				if (input.type === 'radio'){
+
+					//If the radio button's value is 'yes'
+					if (input.value === 'yes'){
+
+						// And if the corresponding data in localStorage equals 'yes'
+						if (formData[id] === 'yes'){
+
+							// Check this radio button
 							input.checked = true;
+
+							return;
+						}
+					// But if the radio button's value is 'no'	
+					} else if (input.value === 'no'){
+
+						// and the corresponding data in localStorage equals 'no'
+						if (formData[id] === 'no'){
+
+							//Check this radio button
+							input.checked = true;
+
 							return;
 						}
 					}
+				} else {
+					input.value = formData[id];
+				}
 
-					// If the input is a radio button
-					if (input.type === 'radio'){
+			}).join('');
+		};
 
-						//If the radio button's value is 'yes'
-						if (input.value === 'yes'){
+		//Clear out the localStorage
+		var removeInfo = function(){
+			localStorage.removeItem(storagePrefix);
+		};
 
-							// And if the corresponding data in localStorage equals 'yes'
-							if (formData[id] === 'yes'){
+		//Log in form input to localStorage
+		var inputHandler = function(event){
 
-								// Check this radio button
-								input.checked = true;
+			// Only run for fields in the #save-me form
+			if (!event.target.closest('#save-me')) return;
 
-								return;
-							}
-						// But if the radio button's value is 'no'	
-					} else if (input.value === 'no'){
+			var id = getID(event.target);
+			if (!id) return;
 
-							// and the corresponding data in localStorage equals 'no'
-							if (formData[id] === 'no'){
+			// Get any existing data from the formData local storage 
+			var existing = localStorage.getItem(storagePrefix);
 
-								//Check this radio button
-								input.checked = true;
+			// Parse any existing string data or, if there's no data, create an object
+			existing = existing ? JSON.parse(existing) : {};
 
-								return;
-							}
-						}
-					} else {
-						input.value = formData[id];
-					}
+				// Set the Key/Value for the current form field
+				existing[id] = event.target.value;
 
-				}).join('');
-			};
-
-			//Clear out the localStorage
-			var removeInfo = function(){
-				localStorage.removeItem(storagePrefix);
-			};
-
-			//Log in form input to localStorage
-			var inputHandler = function(event){
-
-				// Only run for fields in the #save-me form
-				if (!event.target.closest('#save-me')) return;
-
-				var id = getID(event.target);
-				if (!id) return;
-
-				// Get any existing data from the formData local storage 
-				var existing = localStorage.getItem(storagePrefix);
-
-				// Parse any existing string data or, if there's no data, create an object
-				existing = existing ? JSON.parse(existing) : {};
-
-					// Set the Key/Value for the current form field
-					existing[id] = event.target.value;
-
-				// Add the current form field's value to the formData object as a string
-				localStorage.setItem(storagePrefix, JSON.stringify(existing));
-			};
+			// Add the current form field's value to the formData object as a string
+			localStorage.setItem(storagePrefix, JSON.stringify(existing));
+		};
 
 
-			//If the Submit button is clicked removeInfo
-			var submitHandler = function(event){
+		//If the Submit button is clicked removeInfo
+		var submitHandler = function(event){
 
-				if (event.target.id !== 'save-me') return;
-				
-				removeInfo();
-			};
+			if (event.target.id !== 'save-me') return;
+			
+			removeInfo();
+		};
 
-			//
-			// Inits and Event Handlers
-			//
+		//
+		// Inits and Event Handlers
+		//
 
-			loadInfo();
+		loadInfo();
 
-			document.addEventListener('input', inputHandler, false);
+		document.addEventListener('input', inputHandler, false);
 
-			document.addEventListener('submit', submitHandler, false);
+		document.addEventListener('submit', submitHandler, false);
 
-		})();
+	})();
 
-	</script>
+</script>
 </body>
 </html>
